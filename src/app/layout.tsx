@@ -1,24 +1,32 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/shared/Navbar";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/shared/Navbar";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "React Mini Test",
 };
+const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface RootLayoutProps {
   children: React.ReactNode;
-}>) {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head />
       <body className={inter.className}>
-        <Navbar />
-        <section>{children}</section>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <section>{children}</section>
+        </ThemeProvider>
       </body>
     </html>
   );
