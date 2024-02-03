@@ -33,12 +33,17 @@ import {
 } from "@/components/ui/table";
 import { generateColumns } from "@/utitlities/dataTable";
 
-
-export default function DataTable<T>({ data }: {data: T[]}) {
+interface DataTableProps<T> {
+  data: T[];
+  searchApplicableKey?: string;
+}
+export default function DataTable<T>({
+  data,
+  searchApplicableKey,
+}: DataTableProps<T>) {
   const columns: ColumnDef<T>[] = generateColumns<T>(
     data?.length ? data[0] : ({} as T)
   );
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -69,42 +74,50 @@ export default function DataTable<T>({ data }: {data: T[]}) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {!!searchApplicableKey && (
+        <div className="flex items-center py-4">
+          <Input
+            placeholder={`Filter ${searchApplicableKey}...`}
+            value={
+              (table
+                .getColumn(searchApplicableKey)
+                ?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              table
+                .getColumn(searchApplicableKey)
+                ?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>

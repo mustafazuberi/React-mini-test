@@ -1,6 +1,23 @@
-import { ColumnDef } from "@tanstack/react-table";
-
 export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  address: {
+    street: string;
+    suite: string;
+    city: string;
+    zipcode: string;
+    geo: [Object];
+  };
+  phone: string;
+  website: string;
+  company: {
+    [x: string]: string;
+  };
+}
+
+export interface TableUser {
   id: number;
   name: string;
   username: string;

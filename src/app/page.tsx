@@ -1,5 +1,5 @@
-import { User } from "@/interfaces";
-import UsersTable from "@/shared/UsersDataTable";
+import { TableUser, User } from "@/interfaces";
+import DataTable from "@/shared/DataTable";
 
 const USERS_API_ENDPOINT = "https://jsonplaceholder.typicode.com/users";
 
@@ -10,13 +10,25 @@ const page = async () => {
   if (!users) return null;
 
   return (
-    <main className="p-10 flex flex-col gap-y-6">
-      <h1 className="text-3xl text-black font-extrabold text-center">
-        React Mini Test
-      </h1>
+    <main className="px-8">
       <UsersTable users={users} />
     </main>
   );
 };
 
 export default page;
+
+const UsersTable: React.FC<{ users: User[] }> = async ({ users }) => {
+  const data: TableUser[] = users.map(
+    ({ email, id, name, website, phone, username }) => ({
+      email,
+      id,
+      name,
+      website,
+      phone,
+      username,
+    })
+  );
+
+  return <DataTable data={data} searchApplicableKey="email" />;
+};
