@@ -7,7 +7,9 @@ const page = async () => {
   const res = await fetch(TODOS_API_ENDPOINT);
   const todos: User[] = await res.json();
 
-  if (!todos) return null;
+  if (!todos) {
+    return null;
+  }
 
   return (
     <main className="px-8">
