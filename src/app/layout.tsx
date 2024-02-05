@@ -31,5 +31,3 @@ export default function RootLayout({ children }: RootLayoutProps) {
     </html>
   );
 }
-
-// dummy change

@@ -14,6 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,13 +38,37 @@ interface DataTableProps<T> {
   data: T[];
   searchApplicableKey?: string;
 }
+
 export default function DataTable<T>({
   data,
   searchApplicableKey,
 }: DataTableProps<T>) {
-  const columns: ColumnDef<T>[] = generateColumns<T>(
-    data?.length ? data[0] : ({} as T)
-  );
+  const columns: ColumnDef<T>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    ...generateColumns<T>(data?.length ? data[0] : ({} as T)),
+  ];
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -144,6 +169,7 @@ export default function DataTable<T>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="h-16"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -191,5 +217,3 @@ export default function DataTable<T>({
     </div>
   );
 }
-
-// dummy change
