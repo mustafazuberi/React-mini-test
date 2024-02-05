@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { generateColumns } from "@/utitlities/dataTable";
+import SelectedRowsModal from "./SelectedRowsModal";
 
 interface DataTableProps<T> {
   data: T[];
@@ -77,6 +78,9 @@ export default function DataTable<T>({
     VisibilityState
   >({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [showSelectedRowsModal, setShowSelectedRowsModal] = React.useState<
+    boolean
+  >(false);
 
   const table = useReactTable({
     data,
@@ -97,24 +101,43 @@ export default function DataTable<T>({
     },
   });
 
+  const renderSelectedRowsModal = () => {
+    const selectedRows = table
+      .getSelectedRowModel()
+      .rows.map((row) => ({ ...row.original }));
+    return (
+      showSelectedRowsModal && (
+        <SelectedRowsModal
+          setShowSelectedRowsModal={setShowSelectedRowsModal}
+          selectedRows={selectedRows as Record<string, any>[]}
+        />
+      )
+    );
+  };
+
   return (
     <div className="w-full">
-      {!!searchApplicableKey && (
-        <div className="flex items-center py-4">
-          <Input
-            placeholder={`Filter ${searchApplicableKey}...`}
-            value={
-              (table
-                .getColumn(searchApplicableKey)
-                ?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              table
-                .getColumn(searchApplicableKey)
-                ?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
+      <div>
+        <div className="flex items-center py-4 gap-x-3">
+          {!!searchApplicableKey && (
+            <Input
+              placeholder={`Filter ${searchApplicableKey}...`}
+              value={
+                (table
+                  .getColumn(searchApplicableKey)
+                  ?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                table
+                  .getColumn(searchApplicableKey)
+                  ?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+          )}
+          <Button onClick={() => setShowSelectedRowsModal((prev) => !prev)}>
+            Show Selected Rows
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
@@ -142,78 +165,79 @@ export default function DataTable<T>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      )}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="h-16"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="h-16"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
+      <div>{renderSelectedRowsModal()}</div>
     </div>
   );
 }
